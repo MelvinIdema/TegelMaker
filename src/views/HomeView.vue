@@ -395,42 +395,7 @@ const debouncedUpdatePdf = () => {
   }, 500)
 }
 
-// Function to convert PDF to image
-async function pdfToImage(pdfBytes: Uint8Array, scale: number = 3): Promise<Uint8Array> {
-  // Load the PDF document
-  const loadingTask = pdfjsLib.getDocument({ data: pdfBytes })
-  const pdfDocument = await loadingTask.promise
 
-  // Get the first page
-  const page = await pdfDocument.getPage(1)
-
-  // Get viewport with the specified scale for better quality
-  const viewport = page.getViewport({ scale })
-
-  // Create canvas
-  const canvas = document.createElement('canvas')
-  const context = canvas.getContext('2d')!
-  canvas.width = viewport.width
-  canvas.height = viewport.height
-
-  // Render the page to canvas
-  const renderContext = {
-    canvasContext: context,
-    viewport: viewport
-  }
-
-  await page.render(renderContext).promise
-
-  // Convert canvas to PNG blob
-  return new Promise((resolve) => {
-    canvas.toBlob(async (blob) => {
-      if (blob) {
-        const arrayBuffer = await blob.arrayBuffer()
-        resolve(new Uint8Array(arrayBuffer))
-      }
-    }, 'image/png', 1.0)
-  })
-}
 
 // Function to generate final A4 landscape PDF with duplicated content
 async function generateFinalPdf() {
@@ -441,52 +406,55 @@ async function generateFinalPdf() {
     // Create the modified PDF first
     const modifiedPdfBytes = await createModifiedPdf(value.value)
 
-    // Convert PDF to high-quality image
-    const imageBytes = await pdfToImage(modifiedPdfBytes) // Use default high quality scale
+    // Load the modified PDF to get its pages
+    const modifiedPdfDoc = await PDFDocument.load(modifiedPdfBytes)
 
     // Create a new A4 landscape PDF document
     const finalPdfDoc = await PDFDocument.create()
     finalPdfDoc.registerFontkit(fontkit)
 
-    // Embed the image
-    const embeddedImage = await finalPdfDoc.embedPng(imageBytes)
-
     // A4 landscape dimensions (842 x 595 points)
     const a4LandscapeWidth = 842
     const a4LandscapeHeight = 595
-    const page = finalPdfDoc.addPage([a4LandscapeWidth, a4LandscapeHeight])
+    const finalPage = finalPdfDoc.addPage([a4LandscapeWidth, a4LandscapeHeight])
 
-    // Get image dimensions
-    const imageWidth = embeddedImage.width
-    const imageHeight = embeddedImage.height
+            // Get the first page from the modified PDF
+    const modifiedPages = modifiedPdfDoc.getPages()
+    const sourcePage = modifiedPages[0]
+
+    // Get the original page dimensions
+    const { width: originalWidth, height: originalHeight } = sourcePage.getSize()
+
+    // Create form objects from the page content to embed as high-quality vector graphics
+    const embeddedPage = await finalPdfDoc.embedPage(sourcePage)
 
     // Calculate scaling to fit the original size on half of A4 landscape
     const targetWidth = a4LandscapeWidth / 2 // Exactly half the page width
     const targetHeight = a4LandscapeHeight // Full page height
 
     // Calculate scale to maintain aspect ratio
-    const scaleX = targetWidth / imageWidth
-    const scaleY = targetHeight / imageHeight
+    const scaleX = targetWidth / originalWidth
+    const scaleY = targetHeight / originalHeight
     const scale = Math.min(scaleX, scaleY)
 
-    const scaledWidth = imageWidth * scale
-    const scaledHeight = imageHeight * scale
+    const scaledWidth = originalWidth * scale
+    const scaledHeight = originalHeight * scale
 
     // Calculate positions for perfect fit in each half
     const leftX = (a4LandscapeWidth / 4) - (scaledWidth / 2) // Center on left half
     const rightX = (3 * a4LandscapeWidth / 4) - (scaledWidth / 2) // Center on right half
     const y = a4LandscapeHeight - scaledHeight // Align at top with no margin
 
-    // Draw the image on the left side
-    page.drawImage(embeddedImage, {
+    // Draw the embedded page on the left side
+    finalPage.drawPage(embeddedPage, {
       x: leftX,
       y: y,
       width: scaledWidth,
       height: scaledHeight,
     })
 
-    // Draw the image on the right side (copy)
-    page.drawImage(embeddedImage, {
+    // Draw the same embedded page on the right side (copy)
+    finalPage.drawPage(embeddedPage, {
       x: rightX,
       y: y,
       width: scaledWidth,
@@ -518,8 +486,14 @@ async function generateFinalPdf() {
 
   } catch (error) {
     console.error('Error generating final PDF:', error)
+    toast.error('Er is een fout opgetreden bij het genereren van de PDF', {
+      description: 'Probeer het opnieuw of contact de ondersteuning.'
+    })
   } finally {
     isLoading.value = false
+    // Refresh the preview after PDF generation
+    await nextTick()
+    await updatePdf()
   }
 }
 
