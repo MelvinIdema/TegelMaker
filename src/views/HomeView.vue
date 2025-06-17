@@ -18,20 +18,12 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url
 ).toString()
 
-const value = ref(`Neuken?\nNee!\nIk werk aan mijn\n<b>Dodge</b>`)
-const containerRef = ref<HTMLDivElement | null>(null)
-const canvasRef = ref<HTMLCanvasElement | null>(null)
-const editorRef = ref<HTMLDivElement | null>(null)
-const isLoading = ref(false)
-const originalPdfBytes = ref<Uint8Array | null>(null)
-const isUpdatingFromEditor = ref(false)
-
 // Predefined tile options
 const tileOptions = [
   {
     id: 1,
     name: "Verjaardag Tegel",
-    text: `Ben ik verdorie\n<b>28</b>\nGeworden krijg ik\nZo'n achterlijk\n<b>Kut tegeltje</b>`,
+    text: `Ben ik verdorie\n<b>28</b>\ngeworden krijg ik\nzo'n achterlijk\n<b>kut tegeltje</b>`,
     preview: "Ben ik verdorie 28 geworden krijg ik zo'n achterlijk kut tegeltje"
   },
   {
@@ -48,7 +40,16 @@ const tileOptions = [
   }
 ]
 
-const selectedTileId = ref<number | null>(null)
+// Initialize with first template selected
+const selectedTileId = ref<number>(1)
+const value = ref(tileOptions[0].text)
+
+const containerRef = ref<HTMLDivElement | null>(null)
+const canvasRef = ref<HTMLCanvasElement | null>(null)
+const editorRef = ref<HTMLDivElement | null>(null)
+const isLoading = ref(false)
+const originalPdfBytes = ref<Uint8Array | null>(null)
+const isUpdatingFromEditor = ref(false)
 
 // Function to select a predefined tile
 function selectTile(tile: typeof tileOptions[0]) {
@@ -624,10 +625,7 @@ watch(value, () => {
                 class="h-8 px-2 font-bold hover:bg-background"
                 title="Vet (Ctrl+B)"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z" />
-                </svg>
+                Vet
               </Button>
               <Separator orientation="vertical" class="h-6" />
               <span class="text-xs text-muted-foreground">Selecteer tekst en klik Vet of gebruik Ctrl+B</span>

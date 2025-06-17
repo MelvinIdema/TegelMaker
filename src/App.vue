@@ -7,7 +7,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
     <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-950 dark:via-blue-950 dark:to-indigo-950">
       <!-- Header -->
       <header class="border-b border-border/40 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div class="container mx-auto px-4">
+        <div class="container mx-auto px-4 py-1">
           <nav class="flex items-center justify-between h-16">
             <!-- Logo and Title -->
             <div class="flex items-center space-x-3">
