@@ -234,15 +234,15 @@ async function createModifiedPdf(text: string): Promise<Uint8Array> {
   const { width, height } = firstPage.getSize()
 
   // Load and embed fonts
-  const parksideLightResponse = await fetch('/src/assets/fonts/Fontspring-DEMO-parkside-light.otf')
+  const parksideLightResponse = await fetch('/fonts/Fontspring-DEMO-parkside-light.otf')
   const parksideLightBytes = await parksideLightResponse.arrayBuffer()
   const parksideLight = await pdfDoc.embedFont(parksideLightBytes)
 
-  const parksideBoldResponse = await fetch('/src/assets/fonts/Fontspring-DEMO-parkside-bold.otf')
+  const parksideBoldResponse = await fetch('/fonts/Fontspring-DEMO-parkside-bold.otf')
   const parksideBoldBytes = await parksideBoldResponse.arrayBuffer()
   const parksideBold = await pdfDoc.embedFont(parksideBoldBytes)
 
-  const minionItalicResponse = await fetch('/src/assets/fonts/Minion Pro Cond Italic.otf')
+  const minionItalicResponse = await fetch('/fonts/Minion Pro Cond Italic.otf')
   const minionItalicBytes = await minionItalicResponse.arrayBuffer()
   const helvetica = await pdfDoc.embedFont(minionItalicBytes)
 
