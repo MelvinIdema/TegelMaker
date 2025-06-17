@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { nextTick } from 'vue'
+import { toast } from 'vue-sonner'
 
 // Set the worker source to use the local npm package
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
@@ -495,10 +496,22 @@ async function generateFinalPdf() {
     // Generate the final PDF
     const finalPdfBytes = await finalPdfDoc.save()
 
-    // Create a blob and open in new tab
+    // Create a blob and download automatically
     const blob = new Blob([finalPdfBytes], { type: 'application/pdf' })
     const url = URL.createObjectURL(blob)
-    window.open(url, '_blank')
+
+    // Create a temporary download link and trigger download
+    const downloadLink = document.createElement('a')
+    downloadLink.href = url
+    downloadLink.download = 'mijn-tegel.pdf'
+    document.body.appendChild(downloadLink)
+    downloadLink.click()
+    document.body.removeChild(downloadLink)
+
+    // Show success toast
+    toast.success('Je tegel wordt gedownload!', {
+      description: 'Het PDF-bestand wordt naar je downloads map gedownload.'
+    })
 
     // Clean up the URL after a delay
     setTimeout(() => URL.revokeObjectURL(url), 1000)
