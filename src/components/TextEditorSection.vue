@@ -78,7 +78,7 @@ defineExpose({
               </svg>
             </TooltipTrigger>
             <TooltipContent>
-              <p class="text-xs">Gebruik Enter voor regelafbreking<br/>Selecteer tekst en klik Vet of gebruik Ctrl+B</p>
+              <p class="text-xs">Gebruik Enter voor regelafbreking<br/>Desktop: Selecteer tekst en klik Vet of gebruik Ctrl+B<br/>Mobile: Selecteer tekst voor contextmenu</p>
             </TooltipContent>
           </Tooltip>
         </Label>
